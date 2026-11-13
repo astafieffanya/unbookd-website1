@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Request — unbookd.</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2064%2064%27%3E%3Crect%20width%3D%2764%27%20height%3D%2764%27%20rx%3D%2714%27%20fill%3D%27%235b1410%27/%3E%3Ctext%20x%3D%2733%27%20y%3D%2742%27%20text-anchor%3D%27middle%27%20font-family%3D%27Inter%20Tight%2CArial%2Csans-serif%27%20font-weight%3D%27900%27%20font-size%3D%2727%27%20letter-spacing%3D%27-1.6%27%20fill%3D%27%23f5eed3%27%3Eub%3Ctspan%20fill%3D%27%23a3b8d8%27%3E.%3C/tspan%3E%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,500;0,600;0,700;0,800;1,700;1,800&family=Inter:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#f5eed3; --paper:#fbf7e6; --ink:#3a0f0c; --soft:#7a5a52; --line:rgba(58,15,12,.16);
+    --red:#5b1410; --red-dk:#2b0c09; --blue:#a3b8d8; --berry:#7d2234;
+    --display:"Inter Tight", system-ui, sans-serif; --body:"Inter", system-ui, sans-serif; --mono:"IBM Plex Mono", ui-monospace, monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--cream);color:var(--ink);font-family:var(--body);-webkit-font-smoothing:antialiased;min-height:100vh;display:flex;flex-direction:column}
+  a{color:inherit;text-decoration:none}
+  .top{display:flex;justify-content:space-between;align-items:center;padding:22px 28px;gap:20px}
+  .logo{font-family:var(--display);font-weight:900;font-size:26px;letter-spacing:-.06em;color:var(--red)}
+  .logo i{color:var(--blue);font-style:normal;animation:blink 4s ease-in-out infinite}
+  @keyframes blink{0%,100%{color:var(--blue)}50%{color:var(--berry)}}
+  .q h1 em{font-style:italic;color:var(--red)}
+  .top .count{font-family:var(--mono);font-size:12px;color:var(--soft);text-transform:uppercase;letter-spacing:.04em}
+  .top .exit{font-size:14px;color:var(--soft);font-weight:500}
+  .top .exit:hover{color:var(--ink)}
+  .bar{height:4px;background:rgba(58,15,12,.08);margin:0 28px;border-radius:4px;overflow:hidden}
+  .bar div{height:100%;background:var(--red);width:0;transition:width .4s ease;border-radius:4px}
+
+  main{flex:1;display:flex;align-items:flex-start;justify-content:center;padding:60px 24px 140px}
+  .q{width:100%;max-width:820px;animation:in .35s ease}
+  .opts .opt{animation:in .45s cubic-bezier(.2,.8,.2,1) backwards}
+  .opts .opt:nth-child(2){animation-delay:.04s}.opts .opt:nth-child(3){animation-delay:.08s}.opts .opt:nth-child(4){animation-delay:.12s}.opts .opt:nth-child(5){animation-delay:.16s}.opts .opt:nth-child(6){animation-delay:.2s}.opts .opt:nth-child(7){animation-delay:.24s}
+  @keyframes in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  .q .sec{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--red);margin-bottom:14px}
+  .q h1{font-family:var(--display);font-weight:800;font-size:clamp(36px,5.4vw,62px);letter-spacing:-.035em;line-height:1;margin-bottom:14px}
+  .q .sub{color:var(--soft);font-size:17px;margin-bottom:36px;max-width:560px}
+  .q .sub.multi::after{content:" Choose all that apply.";font-weight:600;color:var(--ink)}
+
+  .opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+  .opt{position:relative;text-align:left;background:var(--paper);border:2px solid transparent;border-radius:14px;padding:22px 22px 22px 22px;cursor:pointer;font-family:var(--body);color:var(--ink);transition:border-color .15s,transform .15s,background .15s;box-shadow:0 1px 0 var(--line)}
+  .opt:hover{border-color:var(--blue);transform:translateY(-2px);box-shadow:0 10px 24px -14px rgba(58,15,12,.35)}
+  .opt.on{border-color:var(--red);background:#fff;transform:translateY(-2px)}
+  .opt:active{transform:scale(.98)}
+  .opt .t{font-family:var(--display);font-weight:700;font-size:17px;letter-spacing:-.01em;display:block;padding-right:28px}
+  .opt .d{font-size:14px;color:var(--soft);display:block;margin-top:5px}
+  .opt:hover .tick{border-color:var(--blue)}
+  .opt .tick{position:absolute;top:18px;right:18px;width:22px;height:22px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-size:12px;color:#fff;transition:all .15s}
+  .opt.on .tick{background:var(--red);border-color:var(--red)}
+  .opt .sp{display:inline-flex;gap:6px;align-items:center;margin-top:12px;font-size:13px;font-weight:600;color:var(--berry);border-bottom:1.5px solid currentColor}
+
+  .extra{margin-top:22px}
+  .fld{margin-bottom:16px}
+  .fld label{display:block;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--soft);margin-bottom:8px}
+  .fld label b{color:var(--red)}
+  input,textarea{width:100%;padding:17px 20px;border-radius:14px;border:1.5px solid var(--line);background:#fff;font-family:var(--body);font-size:17px;outline:none;color:var(--ink)}
+  input:focus,textarea:focus{border-color:var(--red)}
+  textarea{min-height:96px;resize:vertical}
+  input[type=date]{max-width:360px}
+  input[type=time]{color-scheme:light}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
+  .check{display:inline-flex;gap:10px;align-items:center;margin-top:16px;font-size:15px;cursor:pointer;user-select:none}
+  .check input{width:20px;height:20px;accent-color:var(--red)}
+
+  .nav{position:fixed;left:0;right:0;bottom:0;background:linear-gradient(transparent,var(--cream) 30%);padding:30px 28px 26px}
+  .nav .in{max-width:820px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:16px 28px;border-radius:100px;font-family:var(--display);font-weight:700;font-size:15px;border:2px solid var(--ink);cursor:pointer;transition:transform .2s,background .2s,opacity .2s;background:none;color:var(--ink)}
+  .btn:hover{transform:translateY(-2px)}
+  .btn.red{background:var(--red);border-color:var(--red);color:#fff}
+  .btn.red:hover{background:var(--red-dk);border-color:var(--red-dk)}
+  .btn[disabled]{opacity:.35;pointer-events:none}
+  .btn.link{border-color:transparent;padding-left:0;color:var(--soft)}
+  .err{color:var(--berry);font-size:14px;margin-top:14px;min-height:20px}
+
+  .opts.chips{display:flex;flex-wrap:wrap;gap:10px}
+  .opts.chips .opt{padding:14px 22px;border-radius:100px}
+  .opts.chips .opt .t{padding-right:0;font-size:17px}
+  .opts.chips .opt .tick{display:none}
+  .opts.chips .opt.on{background:var(--red);border-color:var(--red);color:var(--cream)}
+  /* estimate */
+  .est{background:var(--red-dk);color:var(--cream);border-radius:14px;padding:26px 28px;margin-bottom:18px}
+  .est .sec{color:var(--blue)!important;margin-bottom:8px}
+  .est h2{font-family:var(--display);font-weight:800;font-size:clamp(30px,4vw,44px);letter-spacing:-.035em;line-height:1.05}
+  .est h2 small{font-family:var(--mono);font-size:12px;font-weight:400;letter-spacing:.05em;text-transform:uppercase;opacity:.7;margin-left:6px}
+  .est p{margin-top:10px;font-size:15px;color:rgba(245,238,211,.78);max-width:600px}
+  .bud{margin-bottom:24px}
+  .bwrap{display:flex;align-items:center;gap:10px;max-width:320px}
+  .bwrap span{font-family:var(--display);font-weight:800;font-size:22px}
+  .bud .hint{font-size:14px;color:var(--soft);margin-top:8px}
+  /* review */
+  .review{background:var(--paper);border-radius:14px;padding:10px 26px;margin-bottom:24px}
+  .rv{display:grid;grid-template-columns:220px 1fr auto;gap:16px;padding:15px 0;border-bottom:1px solid var(--line);font-size:15px;align-items:start}
+  .rv:last-child{border-bottom:0}
+  .rv span{color:var(--soft)}
+  .rv strong{font-weight:500}
+  .rv button{background:none;border:0;color:var(--red);font-weight:600;cursor:pointer;font-size:13px;font-family:var(--body)}
+  .row{display:flex;gap:12px;flex-wrap:wrap}
+  .addr{font-size:14px;color:var(--soft);margin-top:18px}
+  .addr b{color:var(--ink)}
+  .ok{width:64px;height:64px;border-radius:50%;background:var(--blue);color:var(--red-dk)!important;color:#fff;display:grid;place-items:center;font-size:28px;margin-bottom:26px}
+
+  @media (max-width:640px){
+    main{padding-top:36px}
+    .opts{grid-template-columns:1fr 1fr}
+    .opt{padding:18px}
+    .opt .t{font-size:15px}
+    .grid2{grid-template-columns:1fr}
+    .rv{grid-template-columns:1fr auto}
+    .rv span{grid-column:1/-1;font-size:13px}
+    .top .exit{display:none}
+  }
+  @media (max-width:400px){.opts{grid-template-columns:1fr}}
+  .gl{position:fixed;left:0;top:0;width:520px;height:520px;margin:-260px 0 0 -260px;border-radius:50%;pointer-events:none;z-index:30;opacity:0;transition:opacity .9s ease;will-change:transform,opacity}
+  .gl-base{background:radial-gradient(circle,rgba(163,184,216,.42) 0%,rgba(163,184,216,.14) 38%,transparent 65%)}
+  .gl-logo{background:radial-gradient(circle,rgba(125,34,52,.38) 0%,rgba(125,34,52,.12) 38%,transparent 65%)}
+  @media (hover:none){.gl{display:none}}
+  .brand{display:flex;align-items:center;gap:12px;text-decoration:none}
+  .mark{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:"Inter Tight",sans-serif;font-weight:900;font-size:16px;letter-spacing:-.06em;padding-left:2px;
+    background:#5b1410;color:#f5eed3;transition:transform .45s cubic-bezier(.3,1.6,.5,1);flex-shrink:0}
+  .mark .md{font-style:normal;color:#a3b8d8}
+  @keyframes markd{0%,42%,100%{color:#7d2234}50%,92%{color:#a3b8d8}}
+  @keyframes markc{0%,42%,100%{background:#a3b8d8;color:#5b1410}50%,92%{background:#7d2234;color:#f5eed3}}
+  .brand:hover .mark{transform:scale(1.12) rotate(-8deg)}
+
+  .quick{width:100%;max-width:820px}
+  .quick .sec{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--red)}
+  .quick h1{font-family:var(--display);font-weight:800;font-size:clamp(38px,5.4vw,62px);letter-spacing:-.035em;line-height:1;margin:12px 0 14px}
+  .quick .sub{color:var(--soft);font-size:17px;max-width:560px}
+  .block{margin-top:44px}
+  .block h2{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.02em;margin-bottom:6px}
+  .block .hint2{color:var(--soft);font-size:14px;margin-bottom:16px}
+  .opts.chips{display:flex;flex-wrap:wrap;gap:10px}
+  .opts.chips .opt{padding:13px 20px;border-radius:100px;animation:none}
+  .opts.chips .opt .t{padding-right:0;font-size:16px}
+  .opts.chips .opt .tick{display:none}
+  .opts.chips .opt.on{background:var(--red);border-color:var(--red);color:var(--cream)}
+  .next-opts{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .nav2{margin-top:44px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:28px}
+  .nav2 p{font-size:14px;color:var(--soft);max-width:420px}
+  .done{text-align:left}
+  @media (max-width:640px){.next-opts{grid-template-columns:1fr}.grid2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="gl gl-base"></div><div class="gl gl-logo"></div>
+<div class="top">
+  <a href="index.html" class="brand" aria-label="unbookd. home"><span class="mark">ub<i class="md">.</i></span><span class="logo">unbookd<i>.</i></span></a>
+  <span class="count">About 1 minute</span>
+  <a href="index.html" class="exit">← Back to site</a>
+</div>
+<div class="bar"><div id="bar" style="width:0"></div></div>
+
+<main><div class="quick" id="stage">
+  <div class="sec">Tell us about your event</div>
+  <h1>Let's talk about your event.</h1>
+  <p class="sub">Just the basics, then we'll call you or you pick a time in the calendar. We go through all the details together.</p>
+
+  <div class="block">
+    <h2>What kind of event?</h2>
+    <div class="opts chips" data-q="type">
+      <button type="button" class="opt" data-v="Brand launch / activation"><span class="t">Brand launch / activation</span></button>
+      <button type="button" class="opt" data-v="Corporate event"><span class="t">Corporate event</span></button>
+      <button type="button" class="opt" data-v="Gala / dinner"><span class="t">Gala / dinner</span></button>
+      <button type="button" class="opt" data-v="Fashion show / fashion week"><span class="t">Fashion show / week</span></button>
+      <button type="button" class="opt" data-v="Store opening / VIP evening"><span class="t">Store opening / VIP evening</span></button>
+      <button type="button" class="opt" data-v="Private celebration"><span class="t">Private celebration</span></button>
+      <button type="button" class="opt" data-v="Something else"><span class="t">Something else</span></button>
+    </div>
+  </div>
+
+  <div class="block grid2">
+    <div class="fld"><label>Date</label><input type="date" id="f_date"><label class="check" style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:14px;margin-top:10px"><input type="checkbox" id="f_flex"> Not fixed yet</label></div>
+    <div class="fld"><label>City &amp; country</label><input id="f_city" placeholder="e.g. Luxembourg, or Paris, France"></div>
+  </div>
+
+  <div class="block">
+    <h2>How many guests?</h2>
+    <div class="opts chips" data-q="guests">
+      <button type="button" class="opt" data-v="Under 50"><span class="t">Under 50</span></button>
+      <button type="button" class="opt" data-v="50–150"><span class="t">50–150</span></button>
+      <button type="button" class="opt" data-v="150–300"><span class="t">150–300</span></button>
+      <button type="button" class="opt" data-v="300+"><span class="t">300+</span></button>
+      <button type="button" class="opt" data-v="Not sure yet"><span class="t">Not sure yet</span></button>
+    </div>
+  </div>
+
+  <div class="block">
+    <h2>Your details</h2>
+    <div class="grid2">
+      <div class="fld"><label>Full name <b>*</b></label><input id="f_name" autocomplete="name"></div>
+      <div class="fld"><label>Company / brand <b>*</b></label><input id="f_company" autocomplete="organization"></div>
+      <div class="fld"><label>Email <b>*</b></label><input id="f_email" type="email" autocomplete="email"></div>
+      <div class="fld"><label>Phone <b>*</b></label><input id="f_phone" type="tel" autocomplete="tel" placeholder="+352 …"></div>
+    </div>
+    <div class="fld" style="margin-top:4px"><label>Anything we should know? (optional)</label><textarea id="f_notes" placeholder="e.g. the vibe you have in mind, a DJ you'd like, timings…"></textarea></div>
+  </div>
+
+  <div class="block">
+    <h2>How would you like to continue?</h2>
+    <div class="opts next-opts" data-q="next">
+      <button type="button" class="opt" data-v="Call me"><span class="tick"></span><span class="t">Call me</span><span class="d">We'll call you within 24 hours</span></button>
+      <button type="button" class="opt" data-v="I'll book a slot"><span class="tick"></span><span class="t">I'll book a slot</span><span class="d">Pick a time in our calendar</span></button>
+      <button type="button" class="opt" data-v="Either is fine"><span class="tick"></span><span class="t">Either is fine</span><span class="d">Book a slot, or we call you</span></button>
+    </div>
+  </div>
+
+  <div class="err" id="err"></div>
+  <div class="nav2">
+    <p>We'll go through everything else together on the call: music, sound, timings and budget.</p>
+    <button class="btn red" id="send" type="button">Send request →</button>
+  </div>
+</div></main>
+
+<script>
+const AGENCY_EMAIL = "hello@unbookd.lu";
+const CALENDAR_URL = "https://calendar.app.google/KTS47AfieKEJJm7s7";
+const A = {};
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+document.getElementById('f_date').min = new Date().toISOString().slice(0,10);
+
+document.querySelectorAll('[data-q]').forEach(g => g.querySelectorAll('.opt').forEach(b => b.onclick = () => {
+  A[g.dataset.q] = b.dataset.v;
+  g.querySelectorAll('.opt').forEach(x => { x.classList.toggle('on', x===b); const t=x.querySelector('.tick'); if(t) t.textContent = x===b?'✓':''; });
+  progress();
+}));
+const v = id => document.getElementById(id).value.trim();
+function progress(){
+  const keys=[A.type, v('f_date')||document.getElementById('f_flex').checked, v('f_city'), A.guests, v('f_name'), v('f_company'), v('f_email'), v('f_phone'), A.next];
+  document.getElementById('bar').style.width = (keys.filter(Boolean).length/keys.length*100)+'%';
+}
+document.querySelectorAll('input,textarea').forEach(el => el.addEventListener('input', progress));
+document.getElementById('f_flex').addEventListener('change', progress);
+
+function text(){
+  const date = v('f_date') ? new Date(v('f_date')+'T12:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'long',year:'numeric'}) : '';
+  const L = [['Name',v('f_name')],['Company',v('f_company')],['Email',v('f_email')],['Phone',v('f_phone')],['Wants',A.next],
+    ['Event type',A.type],['Date',date + (document.getElementById('f_flex').checked ? (date?' (flexible)':'Not fixed yet') : '')],['Location',v('f_city')],['Guests',A.guests],['Notes',v('f_notes')]];
+  return 'UNBOOKD: NEW REQUEST\n\n' + L.filter(x=>x[1]).map(x=>x[0]+': '+x[1]).join('\n');
+}
+function mailto(){ return 'mailto:'+AGENCY_EMAIL+'?subject='+encodeURIComponent('New request: '+v('f_company')+(A.next?' · '+A.next:''))+'&body='+encodeURIComponent(text()); }
+
+document.getElementById('send').onclick = () => {
+  const err = document.getElementById('err');
+  const miss = [];
+  if (!v('f_name')) miss.push('your name'); if (!v('f_company')) miss.push('company');
+  if (!/^\S+@\S+\.\S+$/.test(v('f_email'))) miss.push('a valid email'); if (!v('f_phone')) miss.push('phone');
+  if (!A.next) miss.push('how you\'d like to continue');
+  if (miss.length){ err.textContent = 'Please add ' + miss.join(', ') + '.'; return; }
+  err.textContent = '';
+  const T = text(), M = mailto();
+  const first = esc(v('f_name').split(' ')[0]);
+  const showCal = A.next !== 'Call me';
+  document.getElementById('stage').innerHTML = `<div class="done">
+    <div class="ok">✓</div><h1>Thank you, ${first}.</h1>
+    <p class="sub">Your email app should now be open with your request filled in. Just press send.</p>
+    ${showCal ? `<div class="block"><h2>Pick a time for your call</h2><p class="hint2">30 minutes with Anya, by video call.</p>
+      <a class="btn red" href="${CALENDAR_URL}" target="_blank" rel="noopener">Choose a time in the calendar →</a></div>`
+      : `<div class="block"><h2>We'll call you</h2><p class="hint2">Expect a call from Anya within 24 hours.</p></div>`}
+    <div class="row" style="margin-top:36px"><a class="btn" href="${M}">Open email again</a><button class="btn" id="copy" type="button">Copy request</button><a class="btn" href="index.html" style="border-color:transparent">← Back to site</a></div>
+    <p class="addr">Email didn't open? Send it to <b>${AGENCY_EMAIL}</b></p></div>`;
+  document.getElementById('bar').style.width='100%';
+  document.getElementById('copy').onclick = async e => { try { await navigator.clipboard.writeText(T); e.target.textContent='Copied ✓'; } catch { e.target.textContent='Copy failed'; } };
+  window.scrollTo({top:0});
+  window.location.href = M;
+};
+
+if (matchMedia('(hover:hover)').matches && !matchMedia('(prefers-reduced-motion: reduce)').matches){
+  const layers = {}; document.querySelectorAll('.gl').forEach(l => layers[l.className.split('gl-')[1]] = l);
+  let gx=0, gy=0, tx=0, ty=0, zone='base', quietNow=false, inside=false;
+  const paint = () => { for (const k in layers) layers[k].style.opacity = (inside && !quietNow && k===zone) ? 1 : 0; };
+  addEventListener('mousemove', e => { tx=e.clientX; ty=e.clientY; const wasIn = inside; inside=true;
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    const logo = el && el.closest('.brand');
+    const quiet = !!(el && !logo && el.closest('input, textarea, button, a, .opt, .btn, .est, .review'));
+    const z = logo ? 'logo' : 'base';
+    if (z !== zone || quiet !== quietNow || !wasIn){ zone = z; quietNow = quiet; paint(); } });
+  document.addEventListener('mouseleave', () => { inside=false; paint(); });
+  (function gl(){ gx+=(tx-gx)*.08; gy+=(ty-gy)*.08; for (const k in layers) layers[k].style.translate=`${gx}px ${gy}px`; requestAnimationFrame(gl); })();
+}
+</script>
+</body>
+</html>
